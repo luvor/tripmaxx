@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["V45669B929.com.luvor.tracy"],
+        "components": [
+          {
+            "/": "/use*",
+            "comment": "Open the Tripmaxx recap QR and install landing in the app"
+          }
+        ]
+      }
+    ]
+  }
+}

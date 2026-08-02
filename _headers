@@ -1,0 +1,5 @@
+# Apple требует AASA как application/json. GitHub Pages отдавал octet-stream
+# (Apple это терпит), Netlify позволяет отдать правильный тип — используем.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+  Cache-Control: public, max-age=3600
