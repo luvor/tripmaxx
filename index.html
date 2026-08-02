@@ -3,29 +3,349 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tripmaxx — turn your trips into recap videos</title>
+<title>Tripmaxx — your trip is already filmed</title>
+<meta name="description" content="Tripmaxx reads the GPS in your photos, finds your trips and cuts them into a film with a map. On your iPhone, without an account or a subscription.">
+<link rel="icon" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tripmaxx — your trip is already filmed">
+<meta property="og:description" content="Your iPhone finds the trips in your photos and cuts them into a film with a map. Free, on device.">
+<meta property="og:image" content="https://luvor.github.io/tripmaxx/assets/og.jpg">
+<meta property="og:url" content="https://luvor.github.io/tripmaxx/">
+<meta name="twitter:card" content="summary_large_image">
 <style>
-  :root { color-scheme: light; }
-  body { margin: 0; min-height: 100vh; display: flex; flex-direction: column;
-         align-items: center; justify-content: center; text-align: center;
-         font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-         color: #1c1b18; background: #fbf6ec; padding: 40px 20px; }
-  h1 { font-size: 40px; margin: 0 0 8px; color: #f0402e; }
-  p.tag { font-size: 20px; color: #4a463f; margin: 0 0 32px; max-width: 480px; }
-  .cta { display: inline-block; background: #f0402e; color: #fff; text-decoration: none;
-         font-weight: 600; padding: 14px 28px; border-radius: 999px; }
-  .links { margin-top: 40px; font-size: 14px; }
-  .links a { color: #8a857c; margin: 0 8px; }
+  :root {
+    color-scheme: light;
+    --cream: #FAF3EC;
+    --surface: #F7EFE6;
+    --sand: #F1E3D4;
+    --ink: #2A211E;
+    --muted: #6B5A54;
+    --bordeaux: #8E1C2E;
+    --bordeaux-deep: #6E1423;
+    --gold-text: #8A5D1E;
+    --radius: 22px;
+    --page: 1060px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font: 17px/1.6 ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* padding-inline, а не shorthand: .wrap висит на тех же <section>, что и вертикальные отступы */
+  .wrap { max-width: var(--page); margin: 0 auto; padding-inline: 20px; }
+
+  /* — шапка — */
+  header { position: sticky; top: 0; z-index: 10; background: rgba(250,243,236,.86); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(42,33,30,.07); }
+  .bar { display: flex; align-items: center; gap: 12px; height: 62px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; text-decoration: none; color: var(--ink); }
+  .brand img { width: 32px; height: 32px; border-radius: 9px; }
+  .bar .spacer { flex: 1; }
+  .lang { display: flex; gap: 2px; background: var(--sand); border-radius: 999px; padding: 3px; }
+  .lang button { border: 0; background: none; font: inherit; font-size: 14px; font-weight: 700; color: var(--muted); padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+  .lang button[aria-pressed="true"] { background: #fff; color: var(--bordeaux); }
+  .btn {
+    display: inline-block; background: var(--bordeaux); color: #fff; text-decoration: none;
+    font-weight: 800; padding: 13px 24px; border-radius: 999px; white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(142,28,46,.22);
+  }
+  .btn:hover { background: var(--bordeaux-deep); }
+  .btn.sm { padding: 9px 18px; font-size: 15px; box-shadow: none; }
+  @media (max-width: 640px) { .btn.sm { display: none; } }
+
+  /* — герой — */
+  .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; padding-block: 64px 72px; }
+  .kicker { display: inline-block; background: var(--sand); color: var(--gold-text); font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 6px 13px; border-radius: 999px; margin-bottom: 20px; }
+  h1 { font-size: clamp(38px, 6vw, 58px); line-height: 1.04; margin: 0 0 18px; letter-spacing: -.02em; }
+  .lead { font-size: 20px; color: var(--muted); margin: 0 0 30px; max-width: 30em; }
+  .under { margin: 14px 0 0; font-size: 15px; color: var(--muted); }
+  .phone { justify-self: center; width: 268px; aspect-ratio: 9/19.5; background: #000; border-radius: 42px; padding: 9px; box-shadow: 0 26px 60px rgba(42,33,30,.28); }
+  .phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 34px; display: block; }
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; gap: 34px; padding-block: 40px 52px; text-align: center; }
+    .lead { margin-left: auto; margin-right: auto; }
+    .phone { width: 232px; }
+  }
+
+  /* — полоса-доказательство — */
+  .proof { background: var(--bordeaux); color: #fff; }
+  .proof .wrap { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 34px; padding-block: 22px; font-weight: 700; }
+  .proof b { font-size: 22px; }
+  .proof span { opacity: .82; }
+
+  /* — секции — */
+  section { padding-block: 76px; }
+  h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0 0 14px; letter-spacing: -.02em; }
+  .sub { font-size: 19px; color: var(--muted); margin: 0 0 44px; max-width: 34em; }
+  .center { text-align: center; }
+  .center .sub { margin-left: auto; margin-right: auto; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card { background: var(--surface); border-radius: var(--radius); padding: 26px 24px 0; overflow: hidden; }
+  .card .n { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: var(--bordeaux); color: #fff; font-weight: 800; font-size: 15px; margin-bottom: 14px; }
+  .card h3 { font-size: 21px; margin: 0 0 8px; }
+  .card p { color: var(--muted); margin: 0 0 22px; font-size: 16px; }
+  .card img { width: 100%; display: block; border-radius: 16px 16px 0 0; box-shadow: 0 -2px 24px rgba(42,33,30,.1); }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr; } }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 52px; align-items: center; }
+  .split img { width: 100%; max-height: 540px; object-fit: cover; object-position: center top; border-radius: var(--radius); display: block; box-shadow: 0 18px 44px rgba(42,33,30,.16); }
+  /* в одну колонку карта уже узкая — cover резал бы города по краям */
+  @media (max-width: 860px) { .split { grid-template-columns: 1fr; gap: 30px; }
+    .split img { max-height: none; object-fit: contain; } }
+
+  .dark { background: var(--ink); color: var(--cream); }
+  .dark .sub, .dark li { color: #D9CCC5; }
+  .ticks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 30px; font-size: 17px; }
+  .ticks li::before { content: "✓"; color: #E5B9A8; font-weight: 800; margin-right: 10px; }
+  @media (max-width: 640px) { .ticks { grid-template-columns: 1fr; } }
+
+  .prices { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .price { background: var(--surface); border-radius: var(--radius); padding: 28px; }
+  .price.hi { background: var(--sand); border: 2px solid var(--bordeaux); }
+  .price .tag { font-size: 34px; font-weight: 800; margin: 0 0 6px; }
+  .price h3 { margin: 0 0 12px; font-size: 17px; color: var(--gold-text); text-transform: uppercase; letter-spacing: .06em; }
+  .price p { margin: 0; color: var(--muted); }
+  @media (max-width: 640px) { .prices { grid-template-columns: 1fr; } }
+
+  details { border-top: 1px solid rgba(42,33,30,.12); padding: 18px 0; }
+  details summary { font-weight: 800; font-size: 18px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--bordeaux); font-size: 22px; line-height: 1; }
+  details[open] summary::after { content: "–"; }
+  details p { color: var(--muted); margin: 12px 0 0; max-width: 46em; }
+
+  .final { text-align: center; padding-block: 84px 92px; }
+  .final img { width: 78px; height: 78px; border-radius: 20px; margin-bottom: 22px; box-shadow: 0 12px 30px rgba(42,33,30,.22); }
+
+  footer { border-top: 1px solid rgba(42,33,30,.1); padding: 30px 0 46px; font-size: 14px; color: var(--muted); text-align: center; }
+  footer a { color: var(--muted); margin: 0 9px; }
 </style>
 </head>
 <body>
-<h1>Tripmaxx</h1>
-<p class="tag">Turn your travel photos and walks into short recap videos — all on your device.</p>
-<a class="cta" href="https://apps.apple.com/app/tripmaxx/id6791935242">Download on the App Store</a>
-<p class="links">
-  <a href="privacy.html">Privacy Policy</a> ·
-  <a href="privacy.ru.html">Конфиденциальность</a> ·
-  <a href="licenses.html">Credits &amp; Licenses</a>
-</p>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="./"><img src="assets/icon.png" alt=""> Tripmaxx</a>
+    <div class="spacer"></div>
+    <div class="lang">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+    </div>
+    <a class="btn sm" href="https://apps.apple.com/app/tripmaxx/id6791935242" data-i18n="cta_short">App Store</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <span class="kicker" data-i18n="kicker">iPhone · free</span>
+      <h1 data-i18n="h1">Your trip is already filmed</h1>
+      <p class="lead" data-i18n="lead">You just have to watch it. Tripmaxx reads the GPS in your photos, finds the trips you took and cuts them into a film with a map — no editing, no account, no subscription.</p>
+      <a class="btn" href="https://apps.apple.com/app/tripmaxx/id6791935242" data-i18n="cta">Download on the App Store</a>
+      <p class="under" data-i18n="under">iOS 18+ · everything runs on your device</p>
+    </div>
+    <div class="phone">
+      <video src="assets/hero.mp4" poster="assets/hero.jpg" autoplay loop muted playsinline></video>
+    </div>
+  </div>
+
+  <div class="proof">
+    <div class="wrap">
+      <div><b>6 069</b> <span data-i18n="p1">photos in one camera roll</span></div>
+      <div><b>3</b> <span data-i18n="p2">trips found</span></div>
+      <div><b>~1</b> <span data-i18n="p3">minute to scan</span></div>
+    </div>
+  </div>
+
+  <section class="wrap center">
+    <h2 data-i18n="how_h">Three steps, and two of them are optional</h2>
+    <p class="sub" data-i18n="how_s">Open the app, and the work is already done. Everything after that is you deciding how the film should look.</p>
+    <div class="steps">
+      <div class="card">
+        <span class="n">1</span>
+        <h3 data-i18n="s1_h">It finds the trips itself</h3>
+        <p data-i18n="s1_p">Nothing to tag by hand. The GPS in your photos already knows where you were and how many days it took.</p>
+        <img src="assets/screen-home.jpg" alt="" loading="lazy">
+      </div>
+      <div class="card">
+        <span class="n">2</span>
+        <h3 data-i18n="s2_h">You stay the director</h3>
+        <p data-i18n="s2_p">Every stop in one list: reorder, delete, swap the photos, or make the whole thing shorter. Or change nothing at all.</p>
+        <img src="assets/screen-stops.jpg" alt="" loading="lazy">
+      </div>
+      <div class="card">
+        <span class="n">3</span>
+        <h3 data-i18n="s3_h">A film with a map</h3>
+        <p data-i18n="s3_p">One tap, and the recap is in your Photos — 9:16 for Stories, 1:1 for the feed, 16:9 for YouTube.</p>
+        <img src="assets/screen-done.jpg" alt="" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap split">
+    <div>
+      <h2 data-i18n="map_h">The map isn't a screenshot</h2>
+      <p class="sub" data-i18n="map_s">It draws your actual route — city after city, with kilometres and days, and your photos landing on the places where you took them.</p>
+      <p style="color:var(--gold-text);font-weight:700;margin:0" data-i18n="map_n">Long trip? It splits itself into Stories-sized pieces.</p>
+    </div>
+    <img src="assets/map.jpg" alt="" loading="lazy">
+  </section>
+
+  <section class="dark">
+    <div class="wrap">
+      <h2 data-i18n="pri_h">Not a single photo leaves your phone</h2>
+      <p class="sub" data-i18n="pri_s">There is no server to send them to. Everything — the scan, the map, the rendering — happens on your iPhone.</p>
+      <ul class="ticks">
+        <li data-i18n="pri1">No account, no sign-up</li>
+        <li data-i18n="pri2">No cloud, no uploads</li>
+        <li data-i18n="pri3">No ads, no tracking</li>
+        <li data-i18n="pri4">Works in airplane mode</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="wrap center">
+    <h2 data-i18n="pay_h">The recap is free</h2>
+    <p class="sub" data-i18n="pay_s">You pay only if you want the export in full quality. There is no subscription, and there won't be one.</p>
+    <div class="prices" style="text-align:left">
+      <div class="price">
+        <h3 data-i18n="pay_f">Free</h3>
+        <p class="tag">$0</p>
+        <p data-i18n="pay_fp">The whole app. 720p export with a small watermark, as many recaps as you like.</p>
+      </div>
+      <div class="price hi">
+        <h3 data-i18n="pay_h2">HD export</h3>
+        <p class="tag">$0.99</p>
+        <p data-i18n="pay_hp">1080p, no watermark. Paid per export — nothing recurring.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2 data-i18n="faq_h">Questions people actually ask</h2>
+    <div style="margin-top:26px">
+      <details>
+        <summary data-i18n="q1">Do you upload my photos anywhere?</summary>
+        <p data-i18n="a1">No. The app has no backend and no account. The only thing it ever downloads is map tiles — and that's a download, not an upload.</p>
+      </details>
+      <details>
+        <summary data-i18n="q2">What if my photos have no GPS?</summary>
+        <p data-i18n="a2">Then the trip can't be found automatically — but you can pick the photos yourself and build the film from them.</p>
+      </details>
+      <details>
+        <summary data-i18n="q3">How long does it take?</summary>
+        <p data-i18n="a3">Scanning a large camera roll takes about a minute, once. Rendering a recap is usually one to two minutes, and you can leave the app while it works.</p>
+      </details>
+      <details>
+        <summary data-i18n="q4">Which iPhone do I need?</summary>
+        <p data-i18n="a4">Any iPhone on iOS 18 or newer. Everything is rendered on the device, so a newer phone renders faster.</p>
+      </details>
+      <details>
+        <summary data-i18n="q5">Is there an Android version?</summary>
+        <p data-i18n="a5">Not yet. Tripmaxx is built on Apple's on-device frameworks, so today it's iPhone only.</p>
+      </details>
+    </div>
+  </section>
+
+  <div class="wrap final">
+    <img src="assets/icon.png" alt="Tripmaxx">
+    <h2 data-i18n="fin_h">Your first film, tonight</h2>
+    <p class="sub center" style="margin:0 auto 30px" data-i18n="fin_s">The trips are already in your camera roll. It takes one tap to watch them.</p>
+    <a class="btn" href="https://apps.apple.com/app/tripmaxx/id6791935242" data-i18n="cta">Download on the App Store</a>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="privacy.html">Privacy Policy</a> ·
+    <a href="privacy.ru.html">Конфиденциальность</a> ·
+    <a href="licenses.html">Credits &amp; Licenses</a> ·
+    <a href="https://www.instagram.com/tripmaxx.app/">@tripmaxx.app</a>
+    <p style="margin:14px 0 0">© 2026 Tripmaxx</p>
+  </div>
+</footer>
+
+<script>
+  const RU = {
+    cta_short: 'App Store',
+    kicker: 'iPhone · бесплатно',
+    h1: 'Твоя поездка уже снята',
+    lead: 'Осталось её посмотреть. Tripmaxx читает GPS в фотографиях, находит поездки и собирает из них фильм с картой — без монтажа, без аккаунта, без подписки.',
+    cta: 'Скачать в App Store',
+    under: 'iOS 18+ · всё считается на твоём телефоне',
+    p1: 'фотографий в одной галерее',
+    p2: 'поездки найдено',
+    p3: 'минута на разбор',
+    how_h: 'Три шага, из которых два — по желанию',
+    how_s: 'Открываешь приложение, а работа уже сделана. Дальше только твои решения о том, каким будет фильм.',
+    s1_h: 'Находит поездки сам',
+    s1_p: 'Ничего не нужно отмечать вручную. GPS в фотографиях уже знает, где ты был и сколько дней это заняло.',
+    s2_h: 'Режиссёр — ты',
+    s2_p: 'Все стопы одним списком: поменять местами, удалить, заменить фотографии, сделать короче. Или не трогать ничего.',
+    s3_h: 'Фильм с картой',
+    s3_p: 'Один тап — и рекап в «Фото»: 9:16 в сторис, 1:1 в ленту, 16:9 на YouTube.',
+    map_h: 'Карта — не скриншот',
+    map_s: 'Она рисуется по твоему реальному маршруту: город за городом, с километрами и днями, а фотографии ложатся туда, где ты их снял.',
+    map_n: 'Длинная поездка? Ролик сам режется на куски под сторис.',
+    pri_h: 'Ни одна фотография не уходит с телефона',
+    pri_s: 'Их просто некуда отправлять. Разбор, карта, рендер — всё происходит на твоём айфоне.',
+    pri1: 'Без аккаунта и регистрации',
+    pri2: 'Без облака и загрузок',
+    pri3: 'Без рекламы и трекинга',
+    pri4: 'Работает в самолётном режиме',
+    pay_h: 'Рекап бесплатный',
+    pay_s: 'Платишь, только если нужен экспорт в полном качестве. Подписки нет и не будет.',
+    pay_f: 'Бесплатно',
+    pay_fp: 'Всё приложение целиком. Экспорт 720p с маленькой вотермаркой, роликов — сколько угодно.',
+    pay_h2: 'HD-экспорт',
+    pay_hp: '1080p без вотермарки. Оплата за экспорт — ничего повторяющегося.',
+    faq_h: 'Вопросы, которые задают на самом деле',
+    q1: 'Мои фотографии куда-то загружаются?',
+    a1: 'Нет. У приложения нет ни сервера, ни аккаунта. Единственное, что оно скачивает, — тайлы карты; это скачивание, а не отправка.',
+    q2: 'А если в фотографиях нет GPS?',
+    a2: 'Тогда поездка не найдётся автоматически — но можно выбрать фотографии самому и собрать фильм из них.',
+    q3: 'Сколько это занимает времени?',
+    a3: 'Разбор большой галереи — около минуты, один раз. Рендер рекапа обычно одна-две минуты, и приложение можно свернуть.',
+    q4: 'Какой нужен айфон?',
+    a4: 'Любой на iOS 18 и новее. Всё считается на устройстве, поэтому телефон поновее рендерит быстрее.',
+    q5: 'Есть версия для Android?',
+    a5: 'Пока нет. Tripmaxx построен на встроенных фреймворках Apple, так что сегодня это только iPhone.',
+    fin_h: 'Первый фильм — сегодня вечером',
+    fin_s: 'Поездки уже лежат в твоей галерее. Чтобы их посмотреть, нужен один тап.',
+  };
+
+  const EN = {};
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    EN[el.dataset.i18n] = el.textContent;
+  });
+
+  function apply(lang) {
+    const dict = lang === 'ru' ? RU : EN;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const text = dict[el.dataset.i18n];
+      if (text) el.textContent = text;
+    });
+    document.documentElement.lang = lang;
+    document.querySelectorAll('.lang button').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
+    });
+    try { localStorage.setItem('lang', lang); } catch (e) { /* приватный режим */ }
+  }
+
+  // Приоритет: ?lang= в ссылке → выбор в прошлый раз → язык браузера.
+  const asked = new URLSearchParams(location.search).get('lang');
+  let saved = null;
+  try { saved = localStorage.getItem('lang'); } catch (e) { /* приватный режим */ }
+  apply(asked || saved || (navigator.language.startsWith('ru') ? 'ru' : 'en'));
+
+  document.querySelectorAll('.lang button').forEach((b) => {
+    b.addEventListener('click', () => apply(b.dataset.lang));
+  });
+</script>
 </body>
 </html>
