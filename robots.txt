@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tripmaxx.chynybekov.com/sitemap.xml
