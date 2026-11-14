@@ -1,4 +1,5 @@
-// Метка рекламной кампании: ?c=<метка> в адресе лендинга → ?pt=&ct= на ссылке в App Store.
+// Метка кампании: ?c=<метка> или ?ct=<метка> → ?pt=&ct= на ссылке в App Store.
+// ct нужен для QR-кода в экспортированных reels, где URL уже задан как ?ct=qr_end.
 // Читается в ASC → Analytics → Acquisition → Campaigns. Без этого источник установки
 // приходится выводить из гео — на двух кампаниях в одной стране метод разваливается.
 //
@@ -8,7 +9,8 @@
   const APPLE_PROVIDER_TOKEN = '127317975';
   const MAX_CT_LENGTH = 30; // лимит Apple на ct
 
-  const tag = new URLSearchParams(location.search).get('c');
+  const params = new URLSearchParams(location.search);
+  const tag = params.get('c') || params.get('ct');
   if (!APPLE_PROVIDER_TOKEN || !tag) return;
   // Метка приходит из URL — в ссылку пускаем только то, что сами же и раздаём.
   if (!new RegExp('^[a-z0-9_-]{1,' + MAX_CT_LENGTH + '}$').test(tag)) return;
